@@ -37,7 +37,7 @@ def load_data(files, data_dir, label_count):
     return data, labels
 
 def get_data():
-    data_dir = '.\Datasets\cifar-10-batches-py'
+    data_dir = './Datasets/cifar-10-batches-py'
     img_dim = img_size * img_size * img_channels
     # batches.meta contains the names of the different labels ("truck", "plane", ...)
     #meta = unpickle(data_dir + '/batches.meta')

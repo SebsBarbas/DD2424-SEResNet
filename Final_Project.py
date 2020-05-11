@@ -1,5 +1,6 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf		
@@ -14,11 +15,14 @@ from Squeeze_and_Excite import Squeeze_and_Excite
 from ResNet50 import *
 from LoadDataset import *
 
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.allow_growth = True
+
 #%load_ext tensorboard
 #!rm -rf ./logs/
 
-epoch = 1
-batch_size = 32
+epoch = 10
+batch_size = 128
 learning_rate = 0.01
 
 
@@ -98,8 +102,8 @@ def test_step(images, labels):
 
     test_loss(t_loss)
     test_accuracy(labels, predictions)
-	test_top1(labels, predictions)
-	test_top5(labels, predictions)
+    test_top1(labels, predictions)
+    test_top5(labels, predictions)
 
 
 if __name__ == "__main__":
@@ -131,56 +135,56 @@ if __name__ == "__main__":
         print("Restaurado de {}".format(manager.latest_checkpoint))
     else:
         print("Inicializando desde cero")
-		
-	current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-	train_log_dir = 'logs/gradient_tape/' + current_time + '/train'
-	test_log_dir = 'logs/gradient_tape/' + current_time + '/test'
-	train_summary_writer = tf.summary.create_file_writer(train_log_dir)
-	test_summary_writer = tf.summary.create_file_writer(test_log_dir)
+
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_log_dir = 'logs/gradient_tape/' + current_time + '/train'
+    test_log_dir = 'logs/gradient_tape/' + current_time + '/test'
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    test_summary_writer = tf.summary.create_file_writer(test_log_dir)
 
 
     train_losses = []
     train_accs = []
-	test_losses = []
+    test_losses = []
     test_accs = []
 
     for i in range(epoch):
         for images, labels in train_data:
             print(tf.shape(images))
             train_step(images, labels)
-		with train_summary_writer.as_default():
-			tf.summary.scalar('loss', train_loss.result(), step=i+1)
-			tf.summary.scalar('accuracy', train_accuracy.result(), step=i+1)
+        with train_summary_writer.as_default():
+            tf.summary.scalar('loss', train_loss.result(), step=i+1)
+            tf.summary.scalar('accuracy', train_accuracy.result(), step=i+1)
 
             
         for images, labels in test_data:
-            train_step(images, labels)
-		with test_summary_writer.as_default():
-			tf.summary.scalar('loss', test_loss.result(), step=i+1)
-			tf.summary.scalar('accuracy', test_accuracy.result(), step=i+1)
+            test_step(images, labels)
+        with test_summary_writer.as_default():
+            tf.summary.scalar('loss', test_loss.result(), step=i+1)
+            tf.summary.scalar('accuracy', test_accuracy.result(), step=i+1)
 
-        template = 'Epoch {}, Loss: {}, Accuracy: {}'
+        template = 'Epoch {}, Train Loss: {}, Train Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
         print(template.format(i+1,
                         train_loss.result(),
                         train_accuracy.result()*100,
 						test_loss.result(),
                         test_accuracy.result()*100))
-						
-		template = 'Top1 Error: {}, Top5 Error: {}'
-		print(template.format((1 - test_top1.result())*100,
+
+        template = 'Top1 Error: {}, Top5 Error: {}'
+        print(template.format((1 - test_top1.result())*100,
 						(1 - test_top5.result())*100))
 
         save_path = manager.save()
 
         train_losses.append(train_loss.result())
         train_accs.append(train_accuracy.result())
-		test_losses.append(test_loss.result())
+        test_losses.append(test_loss.result())
         test_accs.append(test_accuracy.result())
 
         # Reinicia las metricas para el siguiente epoch.
         train_loss.reset_states()
         train_accuracy.reset_states()
-		test_loss.reset_states()
+        test_loss.reset_states()
         test_accuracy.reset_states()
 
 	"""
@@ -196,7 +200,7 @@ if __name__ == "__main__":
     t = np.linspace(1, epoch, num=epoch)
     plot1 = plt.figure(1)
     plt.plot(t, train_losses, 'b')
-	plt.plot(t, test_losses, 'r')
+    plt.plot(t, test_losses, 'r')
     plt.xlabel('epoch')
     plt.ylabel('Loss')
     plt.title('Training loss evolution')
@@ -205,11 +209,11 @@ if __name__ == "__main__":
     plt.xlabel('epoch')
     plt.ylabel('Accuracy')
     plt.plot(t, train_accs, 'b')
-	plt.plot(t, test_accs, 'r')
+    plt.plot(t, test_accs, 'r')
     plt.title('Training accuracy evolution')
     plt.savefig('.\\Result_Pics\\acc_train')
     plt.show()
 
-    #run in the command line: tensorboard --logdir logs/fit
+    #run in the command line: tensorboard --logdir [log dir]
 
     a = 1
