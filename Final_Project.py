@@ -24,7 +24,7 @@ config.gpu_options.allow_growth = True
 epoch = 10
 batch_size = 128
 learning_rate = 0.01
-dataset = 10
+dataset = 100
 
 """
 class layerModel(Model):
@@ -163,15 +163,6 @@ if __name__ == "__main__":
         test_loss.reset_states()
         test_accuracy.reset_states()
 
-	"""
-    for images, labels in test_data:
-        test_step(images, labels)
-
-    template = 'Test Loss: {}, Test Accuracy: {}'
-    print(template.format(
-                        test_loss.result(),
-                        test_accuracy.result()*100))
-	"""
 
     t = np.linspace(1, epoch, num=epoch)
     plot1 = plt.figure(1)

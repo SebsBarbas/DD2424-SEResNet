@@ -47,7 +47,7 @@ def load_data10(files, data_dir, label_count):
 
 def load_data100(files, data_dir, label_count):
     global img_size, img_channels
-    data, labels = unpickle100(data_dir + '/' + files)
+    data, labels = unpickle100(data_dir + '/' + files[0])
     #labels = np.array([[float(i == label) for i in range(label_count)] for label in labels])
     # channels_last
     data = data.reshape([-1, img_channels, img_size, img_size])
