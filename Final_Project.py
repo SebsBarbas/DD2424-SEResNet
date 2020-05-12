@@ -24,34 +24,9 @@ config.gpu_options.allow_growth = True
 epoch = 10
 batch_size = 128
 learning_rate = 0.01
+dataset = 10
 
-
-def unpickle(file):
-    import pickle
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-
-    data_X = dict[b'data']
-
-    test_labels = dict[b'labels']
-    return data_X, test_labels
-
-def oneHotEncoder(data):
-    label_encoder = LabelEncoder()
-    values = np.array(data)
-    onehot_encoder = OneHotEncoder(sparse = False)
-    integer_encoded = label_encoder.fit_transform(values)
-    integer_encoded = integer_encoded.reshape(len(integer_encoded), 1)
-    onehot_encoded = onehot_encoder.fit_transform(integer_encoded)
-    return onehot_encoded
 """
-def normalize(data, mean_x, std_x):
-    data_norm = data / np.max(data)
-    data_norm = data_norm - mean_x
-    data_norm = data_norm / std_x
-    return data_norm
-"""
-
 class layerModel(Model):
     def __init__(self, inp_shape):
         super(layerModel, self).__init__()
@@ -68,6 +43,7 @@ class layerModel(Model):
         return y
 
 #model = layerModel(3)
+"""
 
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
 optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
@@ -108,18 +84,18 @@ def test_step(images, labels):
 
 if __name__ == "__main__":
 
-    save_model_dir = ".\checkpoints2"
+    save_model_dir = ".\checkpoints"
 
     print("loading data...")
-    train_X, train_lab, test_X, test_lab = get_data()
+    train_X, train_lab, test_X, test_lab = get_data(dataset)
     print("normalizing data...")
     train_X, test_X = normalize(train_X, test_X)
     train_data = tf.data.Dataset.from_tensor_slices((train_X, train_lab)).batch(batch_size)
-    test_data = tf.data.Dataset.from_tensor_slices((test_X, test_lab)).batch(10000)
+    test_data = tf.data.Dataset.from_tensor_slices((test_X, test_lab)).batch(batch_size)
 
     #model = ResNet50(include_top=True, weights=None, squeeze=False, squeeze_type='Normal')#, input_tensor = tf.data.Dataset.from_tensor_slices((train_X)))
     #input_tensor = tf.placeholder(tf.float32, shape = [None, train_X.shape[0], train_X.shape[1], train_X.shape[2]])
-    model = ResNet50(include_top=True, squeeze=False, squeeze_type='normal') #pre, identity, normal
+    model = ResNet50(include_top=True, squeeze=False, squeeze_type='normal', classes=dataset) #pre, identity, normal
 
     """
     features, label = iter(train_dataset).next()

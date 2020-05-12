@@ -5,7 +5,6 @@ import pickle
 import random
 import numpy as np
 
-classes = 10
 img_size = 32
 img_channels = 3
 
@@ -14,20 +13,30 @@ img_channels = 3
     #train_X, test_X = normalize(train_X, test_X)
 
 
-def unpickle(file):
+def unpickle10(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
 
     data_X = dict[b'data']
-    test_labels = dict[b'labels']
+    labels = dict[b'labels']
     print("Loading %s : %d." % (file, len(data_X)))
-    return data_X, test_labels
+    return data_X, labels
 
-def load_data(files, data_dir, label_count):
+def unpickle100(file):
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+
+    data_X = dict[b'data']
+    labels = dict[b'fine_labels']
+    print("Loading %s : %d." % (file, len(data_X)))
+    return data_X, labels
+
+
+def load_data10(files, data_dir, label_count):
     global img_size, img_channels
-    data, labels = unpickle(data_dir + '/' + files[0])
+    data, labels = unpickle10(data_dir + '/' + files[0])
     for f in files[1:]:
-        data_n, labels_n =  unpickle(data_dir + '/' + f)
+        data_n, labels_n =  unpickle10(data_dir + '/' + f)
         data = np.append(data, data_n, axis=0)
         labels = np.append(labels, labels_n, axis=0)
     #labels = np.array([[float(i == label) for i in range(label_count)] for label in labels])
@@ -36,16 +45,31 @@ def load_data(files, data_dir, label_count):
     data = data.transpose([0, 2, 3, 1])
     return data, labels
 
-def get_data():
-    data_dir = './Datasets/cifar-10-batches-py'
-    img_dim = img_size * img_size * img_channels
-    # batches.meta contains the names of the different labels ("truck", "plane", ...)
-    #meta = unpickle(data_dir + '/batches.meta')
+def load_data100(files, data_dir, label_count):
+    global img_size, img_channels
+    data, labels = unpickle100(data_dir + '/' + files)
+    #labels = np.array([[float(i == label) for i in range(label_count)] for label in labels])
+    # channels_last
+    data = data.reshape([-1, img_channels, img_size, img_size])
+    data = data.transpose([0, 2, 3, 1])
+    return data, labels
 
-    n_labels = classes
-    train_files = ['data_batch_%d' % d for d in range(1, 6)]
-    train_data, train_labels = load_data(train_files, data_dir, n_labels)
-    test_data, test_labels = load_data(['test_batch'], data_dir, n_labels)
+def get_data(dataset):
+    img_dim = img_size * img_size * img_channels
+    if dataset == 100:
+        n_labels = 100
+        data_dir = './Datasets/cifar-100-python'
+
+        train_data, train_labels = load_data100(['train'], data_dir, n_labels)
+        test_data, test_labels = load_data100(['test'], data_dir, n_labels)
+
+    else:
+        n_labels = 10
+        data_dir = './Datasets/cifar-10-batches-py'
+
+        train_files = ['data_batch_%d' % d for d in range(1, 6)]
+        train_data, train_labels = load_data10(train_files, data_dir, n_labels)
+        test_data, test_labels = load_data10(['test_batch'], data_dir, n_labels)
 
     print("Train data:", np.shape(train_data), np.shape(train_labels))
     print("Test data :", np.shape(test_data), np.shape(test_labels))
