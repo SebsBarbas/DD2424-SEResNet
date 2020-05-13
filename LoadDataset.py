@@ -58,7 +58,8 @@ def get_data(dataset):
     img_dim = img_size * img_size * img_channels
     if dataset == 100:
         n_labels = 100
-        data_dir = './Datasets/cifar-100-python'
+        #data_dir = './Datasets/cifar-100-python'
+        data_dir = '../cifar-100-python'
 
         train_data, train_labels = load_data100(['train'], data_dir, n_labels)
         test_data, test_labels = load_data100(['test'], data_dir, n_labels)
