@@ -78,6 +78,7 @@ def get_data(dataset):
     # Shuffle
     ind = np.random.permutation(len(train_data))
     train_data = train_data[ind]
+    train_labels = np.array(train_labels)
     train_labels = train_labels[ind]
 
     return train_data, train_labels, test_data, test_labels

@@ -42,7 +42,7 @@ def identity_block(input_tensor, kernel_size, filters, stage, block, squeeze = F
     
     
     filters1, filters2, filters3 = filters
-    K.learning_phase()
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
@@ -118,7 +118,7 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2),
     """
 
     filters1, filters2, filters3 = filters
-    K.learning_phase()
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
@@ -219,7 +219,7 @@ def ResNet50(include_top=True, input_tensor=None, input_shape=None, pooling=None
         else:
             img_input = input_tensor
     
-    K.learning_phase()
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
