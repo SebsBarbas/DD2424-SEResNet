@@ -12,6 +12,7 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from tensorflow import keras
 import tensorflow.keras.backend as K
 import tensorflow.keras.applications
 
@@ -41,6 +42,7 @@ def identity_block(input_tensor, kernel_size, filters, stage, block, squeeze = F
     
     
     filters1, filters2, filters3 = filters
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
@@ -55,14 +57,17 @@ def identity_block(input_tensor, kernel_size, filters, stage, block, squeeze = F
         x = squeeze_block(input_tensor)
 
     x = Conv2D(filters1, (1, 1), name=conv_name_base + '2a')(input_tensor)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(x)
     x = Activation('relu')(x)
 
     x = Conv2D(filters2, kernel_size, padding='same', name=conv_name_base + '2b')(x)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(x)
     x = Activation('relu')(x)
 
     x = Conv2D(filters3, (1, 1), name=conv_name_base + '2c')(x)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(x)
    
     #K.int_shape(input_tensor)[bn_axis]
@@ -113,6 +118,7 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2),
     """
 
     filters1, filters2, filters3 = filters
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
@@ -125,17 +131,21 @@ def conv_block(input_tensor, kernel_size, filters, stage, block, strides=(2, 2),
         x = squeeze_block(input_tensor)
 
     x = Conv2D(filters1, (1, 1), strides=strides, name=conv_name_base + '2a')(input_tensor)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2a')(x)
     x = Activation('relu')(x)
 
     x = Conv2D(filters2, kernel_size, padding='same', name=conv_name_base + '2b')(x)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2b')(x)
     x = Activation('relu')(x)
 
     x = Conv2D(filters3, (1, 1), name=conv_name_base + '2c')(x)
+    #x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name=bn_name_base + '2c')(x)
 
     shortcut = Conv2D(filters3, (1, 1), strides=strides, name=conv_name_base + '1')(input_tensor)
+    #shortcut = BatchNormalization(axis=bn_axis, name=bn_name_base + '1')(shortcut, training = False)
     shortcut = BatchNormalization(axis=bn_axis, name=bn_name_base + '1')(shortcut)
 
     if squeeze == True and squeeze_type == 'normal':
@@ -208,6 +218,8 @@ def ResNet50(include_top=True, input_tensor=None, input_shape=None, pooling=None
             img_input = layers.Input(tensor=input_tensor, shape=input_shape)
         else:
             img_input = input_tensor
+    
+    #K.learning_phase()
     if K.image_data_format() == 'channels_last':
         bn_axis = 3
     else:
@@ -215,6 +227,7 @@ def ResNet50(include_top=True, input_tensor=None, input_shape=None, pooling=None
 
     x = ZeroPadding2D(padding=(3, 3), name='conv1_pad')(img_input)
     x = Conv2D(64, (7, 7), strides=(2, 2), padding='valid', kernel_initializer='he_normal', name='conv1')(x)
+    #x = BatchNormalization(axis=bn_axis, name='bn_conv1')(x, training = False)
     x = BatchNormalization(axis=bn_axis, name='bn_conv1')(x)
     x = Activation('relu')(x)
     x = ZeroPadding2D(padding=(1, 1), name='pool1_pad')(x)
